@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ business.name }} — ReviewTap</title>
+  <link rel="stylesheet" href="{{ url_for('dashboard.static', filename='css/dashboard.css') }}">
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="dash-mobile-header">
+    <button class="dash-hamburger" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="dash-sidebar" id="hamburger-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="dash-mobile-title">{{ business.name }}</span>
+  </header>
+
+  <!-- Sidebar Overlay -->
+  <div class="dash-sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+  <div class="dash-layout">
+    <!-- Sidebar -->
+    <aside class="dash-sidebar" id="dash-sidebar" role="navigation" aria-label="Navegación del dashboard">
+      <div class="dash-sidebar-header">
+        <a href="/dashboard" class="dash-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <span>ReviewTap</span>
+        </a>
+      </div>
+      <nav class="dash-nav">
+        <a href="/dashboard" class="dash-nav-item">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+      </nav>
+      <form action="/logout" method="POST" style="margin-top:auto; position:absolute; bottom:0; left:0; right:0;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="dash-logout">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Cerrar sesión
+        </button>
+      </form>
+    </aside>
+
+    <!-- Main -->
+    <main class="dash-main">
+      <div class="detail-header">
+        <div class="detail-header-icon">{{ business.name[:2] }}</div>
+        <div>
+          <h1 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.02em;">{{ business.name }}</h1>
+          <p style="color:var(--ds-text-secondary);font-size:0.9rem;">{{ business.description or 'Sin descripción' }}</p>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-card-icon green">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="metric-card-label">Ubicaciones</div>
+          <div class="metric-card-value">{{ metrics.total_locations }}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-icon purple">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          </div>
+          <div class="metric-card-label">Dispositivos</div>
+          <div class="metric-card-value">{{ metrics.active_devices }}<span style="font-size:0.9rem;color:var(--ds-text-muted)"> / {{ metrics.total_devices }}</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-icon yellow">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="metric-card-label">Interacciones</div>
+          <div class="metric-card-value">{{ metrics.total_interactions }}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-icon blue">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="metric-card-label">Eventos totales</div>
+          <div class="metric-card-value">{{ metrics.total_events }}</div>
+        </div>
+      </div>
+
+      <!-- Devices -->
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2 class="dash-section-title">Dispositivos</h2>
+        </div>
+        <div class="dash-section-body">
+          {% if devices %}
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Código</th>
+                <th>Estado</th>
+                <th>Interacciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for device in devices %}
+              <tr>
+                <td>{{ device.name }}</td>
+                <td><code>{{ device.device_code }}</code></td>
+                <td><span class="badge {{ device.status }}">{{ device.status }}</span></td>
+                <td>{{ device.interaction_count or 0 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="empty-state">
+            <h3>Sin dispositivos</h3>
+            <p>Agrega dispositivos NFC/QR para comenzar a rastrear</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Locations -->
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2 class="dash-section-title">Ubicaciones</h2>
+        </div>
+        <div class="dash-section-body">
+          {% if locations %}
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Ciudad</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for loc in locations %}
+              <tr>
+                <td>{{ loc.name }}</td>
+                <td>{{ loc.city or '—' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="empty-state">
+            <h3>Sin ubicaciones</h3>
+            <p>Agrega ubicaciones para organizar tus dispositivos</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Event Breakdown -->
+      {% if event_breakdown %}
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2 class="dash-section-title">Eventos por Tipo</h2>
+        </div>
+        <div class="dash-section-body">
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for event_type, count in event_breakdown.items() %}
+              <tr>
+                <td>
+                  <span class="badge event">
+                    {% if event_type == 'device_scan' %}Escaneo
+                    {% elif event_type == 'google_click' %}Google
+                    {% elif event_type == 'whatsapp_click' %}WhatsApp
+                    {% elif event_type == 'instagram_click' %}Instagram
+                    {% elif event_type == 'facebook_click' %}Facebook
+                    {% elif event_type == 'tripadvisor_click' %}TripAdvisor
+                    {% elif event_type == 'website_click' %}Sitio web
+                    {% else %}{{ event_type }}{% endif %}
+                  </span>
+                </td>
+                <td>{{ count }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Recent Events -->
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2 class="dash-section-title">Actividad Reciente</h2>
+        </div>
+        <div class="dash-section-body">
+          {% if recent_events %}
+          {% for event in recent_events[:10] %}
+          <div class="activity-item">
+            <div class="activity-dot {% if 'scan' in event.event_type %}scan{% else %}click{% endif %}"></div>
+            <div>
+              <div class="activity-text">
+                {% if event.event_type == 'device_scan' %}Escaneo de dispositivo
+                {% elif event.event_type == 'google_click' %}Click en Google
+                {% elif event.event_type == 'whatsapp_click' %}Click en WhatsApp
+                {% elif event.event_type == 'instagram_click' %}Click en Instagram
+                {% elif event.event_type == 'facebook_click' %}Click en Facebook
+                {% elif event.event_type == 'tripadvisor_click' %}Click en TripAdvisor
+                {% elif event.event_type == 'website_click' %}Click en sitio web
+                {% else %}{{ event.event_type }}{% endif %}
+              </div>
+              <div class="activity-time">{{ event.created_at.strftime('%d/%m/%Y %H:%M') if event.created_at else '' }}</div>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="empty-state">
+            <h3>Sin actividad</h3>
+            <p>Los eventos aparecerán cuando los clientes interactúen</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Audit Log -->
+      {% if recent_audit %}
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2 class="dash-section-title">Registro de Auditoría</h2>
+        </div>
+        <div class="dash-section-body">
+          {% for log in recent_audit %}
+          <div class="activity-item">
+            <div class="activity-dot"></div>
+            <div>
+              <div class="activity-text">{{ log.action }} — {{ log.entity_type or '' }}</div>
+              <div class="activity-time">{{ log.created_at.strftime('%d/%m/%Y %H:%M') if log.created_at else '' }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </main>
+  </div>
+
+  <script>
+  (function() {
+    var btn = document.getElementById('hamburger-btn');
+    var sidebar = document.getElementById('dash-sidebar');
+    var overlay = document.getElementById('sidebar-overlay');
+
+    function openMenu() {
+      sidebar.classList.add('open');
+      overlay.classList.add('active');
+      btn.setAttribute('aria-expanded', 'true');
+      overlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeMenu() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+      btn.setAttribute('aria-expanded', 'false');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    btn.addEventListener('click', function() {
+      if (sidebar.classList.contains('open')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    overlay.addEventListener('click', closeMenu);
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+        closeMenu();
+        btn.focus();
+      }
+    });
+
+    var navLinks = sidebar.querySelectorAll('.dash-nav-item, .dash-logout');
+    for (var i = 0; i < navLinks.length; i++) {
+      navLinks[i].addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+          closeMenu();
+        }
+      });
+    }
+  })();
+  </script>
+</body>
+</html>

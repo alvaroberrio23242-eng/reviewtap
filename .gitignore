@@ -1,0 +1,48 @@
+# Environment
+.env
+.venv/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Instance folder (local DB)
+instance/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Uploads
+var/uploads/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Database backups
+*.db
+*.sqlite3
+
+# Large files
+*.bundle
+*.zip
+*.tar.gz
+*.mp4
+*.avi
