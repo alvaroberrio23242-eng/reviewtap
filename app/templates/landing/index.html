@@ -22,8 +22,8 @@
         <li><a href="#beneficios">Beneficios</a></li>
       </ul>
       <div class="nav-cta">
-        <a href="/login" class="btn btn-secondary">Iniciar sesión</a>
-        <a href="/register" class="btn btn-primary">Comenzar</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Iniciar sesión</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Comenzar</a>
       </div>
     </div>
   </nav>
@@ -38,7 +38,7 @@
       <h1>Convierte cada interacción en <span>feedback medible</span></h1>
       <p>ReviewTap conecta tus dispositivos físicos con canales digitales. Obtén datos reales de cada interacción con tu negocio.</p>
       <div class="hero-actions">
-        <a href="/register" class="btn btn-primary">Comenzar gratis</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Comenzar gratis</a>
         <a href="#como-funciona" class="btn btn-secondary">Ver cómo funciona</a>
       </div>
     </div>
@@ -183,8 +183,8 @@
     <h2>Comienza a recopilar feedback real</h2>
     <p>Configura tu primer dispositivo en menos de 5 minutos. Sin tarjeta de crédito.</p>
     <div class="cta-actions">
-      <a href="/register" class="btn btn-primary">Crear cuenta gratis</a>
-      <a href="/login" class="btn btn-secondary">Ya tengo cuenta</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Crear cuenta gratis</a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Ya tengo cuenta</a>
     </div>
   </section>
 

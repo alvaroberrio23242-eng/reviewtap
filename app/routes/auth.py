@@ -15,7 +15,7 @@ def health_check():
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
-        return jsonify({"message": "Register page"}), 200
+        return render_template("auth/register.html")
 
     data = request.get_json() if request.is_json else request.form
 
@@ -42,7 +42,7 @@ def register():
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        return jsonify({"message": "Login page"}), 200
+        return render_template("auth/login.html")
 
     data = request.get_json() if request.is_json else request.form
 
