@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Crear cuenta — ReviewTap</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <link rel="stylesheet" href="{{ url_for('landing.static', filename='css/landing.css') }}">
   <style>
     .auth-page {
@@ -148,10 +149,21 @@
     try {
       var response = await fetch('/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+        },
         body: JSON.stringify({ full_name: full_name, email: email, password: password })
       });
-      var data = await response.json();
+
+      var data;
+      try {
+        data = await response.json();
+      } catch (parseErr) {
+        errorMsg.textContent = 'Error del servidor';
+        errorMsg.style.display = 'block';
+        return;
+      }
 
       if (response.ok) {
         window.location.href = '/login';
