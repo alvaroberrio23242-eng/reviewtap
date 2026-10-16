@@ -88,6 +88,7 @@
       <div class="dash-section">
         <div class="dash-section-header">
           <h2 class="dash-section-title">Dispositivos</h2>
+          <button type="button" class="dash-btn-primary" data-open-new-dev>+ Nuevo dispositivo</button>
         </div>
         <div class="dash-section-body">
           {% if devices %}
@@ -98,6 +99,7 @@
                 <th>Código</th>
                 <th>Estado</th>
                 <th>Interacciones</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -107,6 +109,10 @@
                 <td><code>{{ device.device_code }}</code></td>
                 <td><span class="badge {{ device.status }}">{{ device.status }}</span></td>
                 <td>{{ device.interaction_count or 0 }}</td>
+                <td>
+                  <a href="/business/{{ business.id }}/devices/{{ device.id }}/qr/download" target="_blank" rel="noopener">Descargar QR</a>
+                  <button type="button" class="dash-btn-ghost" data-toggle-dev="{{ device.id }}" data-status="{{ device.status }}">{% if device.status == 'active' %}Desactivar{% else %}Activar{% endif %}</button>
+                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -124,6 +130,7 @@
       <div class="dash-section">
         <div class="dash-section-header">
           <h2 class="dash-section-title">Ubicaciones</h2>
+          <button type="button" class="dash-btn-primary" data-open-new-loc>+ Nueva ubicaci&oacute;n</button>
         </div>
         <div class="dash-section-body">
           {% if locations %}
@@ -293,5 +300,117 @@
     }
   })();
   </script>
+
+<dialog id="new-loc-dialog" class="new-biz-dialog">
+  <form id="new-loc-form" method="dialog">
+    <h2 style="margin:0 0 16px">Nueva ubicaci&oacute;n</h2>
+    <div id="new-loc-error" class="new-biz-error" role="alert"></div>
+    <label class="new-biz-field">Nombre *<input id="nl-name" type="text" lang="es" autocapitalize="words" maxlength="255" required></label>
+    <label class="new-biz-field">Ciudad<input id="nl-city" type="text" lang="es" autocapitalize="words" maxlength="100"></label>
+    <label class="new-biz-field">Direcci&oacute;n<input id="nl-address" type="text" lang="es" maxlength="255"></label>
+    <div class="new-biz-actions">
+      <button type="button" id="new-loc-cancel" class="dash-btn-ghost">Cancelar</button>
+      <button type="submit" class="dash-btn-primary">Crear ubicaci&oacute;n</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="new-dev-dialog" class="new-biz-dialog">
+  <form id="new-dev-form" method="dialog">
+    <h2 style="margin:0 0 16px">Nuevo dispositivo</h2>
+    <div id="new-dev-error" class="new-biz-error" role="alert"></div>
+    <label class="new-biz-field">Nombre<input id="nd-name" type="text" lang="es" autocapitalize="words" maxlength="255" placeholder="Ej: Mesa 1"></label>
+    <label class="new-biz-field">Ubicaci&oacute;n
+      <select id="nd-loc">
+        <option value="">Sin ubicaci&oacute;n</option>
+        {% for loc in locations %}<option value="{{ loc.id }}">{{ loc.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <div class="new-biz-actions">
+      <button type="button" id="new-dev-cancel" class="dash-btn-ghost">Cancelar</button>
+      <button type="submit" class="dash-btn-primary">Crear dispositivo</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  var BIZ = {{ business.id }};
+  function token() {
+    var meta = document.querySelector("meta[name=csrf-token]");
+    var inp = document.querySelector("input[name=csrf_token]");
+    return meta ? meta.content : (inp ? inp.value : "");
+  }
+  async function send(path) {
+    return null;
+  }
+  async function post(path, body) {
+    var r = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": token() },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    var d = {};
+    try { d = await r.json(); } catch (x) {}
+    return { ok: r.ok, data: d };
+  }
+  function wire(cfg) {
+    var dlg = document.getElementById(cfg.dialog);
+    if (!dlg) return;
+    var form = document.getElementById(cfg.form);
+    var err = document.getElementById(cfg.error);
+    function show(msg) { err.textContent = msg; err.style.display = "block"; }
+    document.querySelectorAll("[" + cfg.open + "]").forEach(function (b) {
+      b.addEventListener("click", function () { err.style.display = "none"; form.reset(); dlg.showModal(); });
+    });
+    document.getElementById(cfg.cancel).addEventListener("click", function () { dlg.close(); });
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      try {
+        var res = await post(cfg.path, cfg.body());
+        if (res.ok) { window.location.reload(); }
+        else { show(res.data.error || cfg.fail); }
+      } catch (x) { show("Error de conexi\u00f3n"); }
+    });
+  }
+  wire({
+    dialog: "new-loc-dialog", form: "new-loc-form", error: "new-loc-error",
+    open: "data-open-new-loc", cancel: "new-loc-cancel",
+    path: "/business/" + BIZ + "/locations", fail: "No se pudo crear la ubicaci\u00f3n",
+    body: function () {
+      var b = { name: document.getElementById("nl-name").value.trim() };
+      var c = document.getElementById("nl-city").value.trim();
+      var a = document.getElementById("nl-address").value.trim();
+      if (c) b.city = c;
+      if (a) b.address = a;
+      return b;
+    }
+  });
+  wire({
+    dialog: "new-dev-dialog", form: "new-dev-form", error: "new-dev-error",
+    open: "data-open-new-dev", cancel: "new-dev-cancel",
+    path: "/business/" + BIZ + "/devices", fail: "No se pudo crear el dispositivo",
+    body: function () {
+      var b = {};
+      var n = document.getElementById("nd-name").value.trim();
+      var l = document.getElementById("nd-loc").value;
+      if (n) b.name = n;
+      if (l) b.location_id = parseInt(l, 10);
+      return b;
+    }
+  });
+  document.querySelectorAll("[data-toggle-dev]").forEach(function (btn) {
+    btn.addEventListener("click", async function () {
+      var action = btn.getAttribute("data-status") === "active" ? "deactivate" : "activate";
+      btn.disabled = true;
+      try {
+        var res = await post("/business/" + BIZ + "/devices/" + btn.getAttribute("data-toggle-dev") + "/" + action);
+        if (res.ok) { window.location.reload(); }
+        else { btn.disabled = false; alert(res.data.error || "No se pudo cambiar el estado"); }
+      } catch (x) { btn.disabled = false; alert("Error de conexi\u00f3n"); }
+    });
+  });
+})();
+</script>
 </body>
 </html>
