@@ -89,7 +89,7 @@
       <!-- Devices -->
       <div class="dash-section">
         <div class="dash-section-header">
-          <h2 class="dash-section-title">Dispositivos</h2>
+          <div><h2 class="dash-section-title">Dispositivos</h2><p class="dash-section-hint">Un dispositivo es una etiqueta NFC o un c&oacute;digo QR que pones en tu local. Tus clientes lo escanean para ir a tu perfil de Google, dejar su opini&oacute;n y ver lo que otros opinaron. Aqu&iacute; puedes crearlo, activarlo o desactivarlo, descargar su QR y eliminarlo.</p></div>
           <button type="button" class="dash-btn-primary" data-open-new-dev>+ Nuevo dispositivo</button>
         </div>
         <div class="dash-section-body">
@@ -132,7 +132,7 @@
       <!-- Locations -->
       <div class="dash-section">
         <div class="dash-section-header">
-          <h2 class="dash-section-title">Ubicaciones</h2>
+          <div><h2 class="dash-section-title">Ubicaciones</h2><p class="dash-section-hint">Las ubicaciones son las sedes o zonas de tu negocio. Cr&eacute;alas para organizar tus dispositivos. Al eliminar una ubicaci&oacute;n tambi&eacute;n se eliminan sus dispositivos.</p></div>
           <button type="button" class="dash-btn-primary" data-open-new-loc>+ Nueva ubicaci&oacute;n</button>
         </div>
         <div class="dash-section-body">
@@ -168,7 +168,7 @@
       {% if event_breakdown %}
       <div class="dash-section">
         <div class="dash-section-header">
-          <h2 class="dash-section-title">Eventos por Tipo</h2>
+          <div><h2 class="dash-section-title">Eventos por Tipo</h2><p class="dash-section-hint">Cu&aacute;ntas veces se escane&oacute; un dispositivo y cu&aacute;ntos clics hubo hacia cada canal (Google, WhatsApp, Instagram, etc.). Es solo lectura.</p></div>
         </div>
         <div class="dash-section-body">
           <table class="dash-table">
@@ -205,7 +205,7 @@
       <!-- Recent Events -->
       <div class="dash-section">
         <div class="dash-section-header">
-          <h2 class="dash-section-title">Actividad Reciente</h2>
+          <div><h2 class="dash-section-title">Actividad Reciente</h2><p class="dash-section-hint">Los &uacute;ltimos escaneos y clics de tus clientes hacia Google y tus otros canales. Es solo lectura.</p></div>
         </div>
         <div class="dash-section-body">
           {% if recent_events %}
@@ -240,7 +240,7 @@
       {% if recent_audit %}
       <div class="dash-section">
         <div class="dash-section-header">
-          <h2 class="dash-section-title">Registro de Auditoría</h2>
+          <div><h2 class="dash-section-title">Registro de Auditoría</h2><p class="dash-section-hint">Historial de cambios hechos en este negocio, como crear, activar o eliminar. Es solo lectura.</p></div>
         </div>
         <div class="dash-section-body">
           {% for log in recent_audit %}
