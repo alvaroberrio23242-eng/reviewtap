@@ -19,4 +19,4 @@
 - Desarrollo y tests usan SQLite. Producción usa PostgreSQL en Render.
 - Estructura: run.py, app/__init__.py (create_app), app/config.py, app/extensions.py, app/routes/, app/services/, app/templates/, migrations/, render.yaml.
 - Render: Build Command "pip install -r requirements.txt && flask db upgrade". Start Command "gunicorn run:app". Variables de entorno definidas en el panel de Render: FLASK_ENV, BASE_URL, DATABASE_URL, SECRET_KEY (solo nombres, nunca valores).
-- Producción https://reviewtap.onrender.com: registro y login funcionan. /dashboard exige sesión y devuelve JSON.
+- Producción https://reviewtap.onrender.com: registro y login funcionan. /dashboard exige sesión y devuelve el panel HTML al navegador y JSON a clientes API (Accept: application/json).
