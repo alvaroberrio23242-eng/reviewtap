@@ -94,4 +94,4 @@ def business_detail(business_id):
 
 def request_accepts_html():
     from flask import request
-    return request.accept_mimetypes.accept_html and not request.accept_mimetypes.accept_json
+    return request.accept_mimetypes.best_match(["application/json", "text/html"]) == "text/html"
