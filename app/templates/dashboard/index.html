@@ -199,9 +199,9 @@
   <form id="new-biz-form" method="dialog">
     <h2 style="margin:0 0 16px">Nuevo negocio</h2>
     <div id="new-biz-error" class="new-biz-error" role="alert"></div>
-    <label class="new-biz-field">Nombre *<input id="nb-name" type="text" maxlength="255" required></label>
-    <label class="new-biz-field">Ciudad<input id="nb-city" type="text" maxlength="100"></label>
-    <label class="new-biz-field">Descripci?n<textarea id="nb-desc" rows="3"></textarea></label>
+    <label class="new-biz-field">Nombre *<input id="nb-name" type="text" lang="es" autocapitalize="words" maxlength="255" required></label>
+    <label class="new-biz-field">Ciudad<input id="nb-city" type="text" lang="es" autocapitalize="words" maxlength="100"></label>
+    <label class="new-biz-field">Descripci&oacute;n<textarea id="nb-desc" lang="es" rows="3"></textarea></label>
     <div class="new-biz-actions">
       <button type="button" id="new-biz-cancel" class="dash-btn-ghost">Cancelar</button>
       <button type="submit" class="dash-btn-primary">Crear negocio</button>
@@ -235,7 +235,7 @@
       try { d = await r.json(); } catch (x) {}
       if (r.status === 201 && d.id) { window.location.href = "/dashboard/business/" + d.id; }
       else { show(d.error || "No se pudo crear el negocio"); }
-    } catch (x) { show("Error de conexi?n"); }
+    } catch (x) { show("Error de conexi\u00f3n"); }
   });
 })();
 </script>
