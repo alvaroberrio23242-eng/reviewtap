@@ -5,6 +5,7 @@ from app.extensions import db
 from app.models.business import Business
 from app.models.location import Location
 from app.models.audit import AuditLog
+from app.models.analytics import AnalyticsEvent
 
 
 def _log_audit(action, business_id=None, location_id=None, details=None):
@@ -72,6 +73,7 @@ def update_location(location, **kwargs):
 def delete_location(location):
     business_id = location.business_id
     location_id = location.id
+    AnalyticsEvent.query.filter_by(location_id=location_id).update({"location_id": None}, synchronize_session=False)
     db.session.delete(location)
     db.session.flush()
     _log_audit("location_delete", business_id=business_id, location_id=location_id)

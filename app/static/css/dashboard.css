@@ -529,3 +529,5 @@ body {
 .new-biz-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px;}
 .new-biz-error{display:none;color:#b91c1c;margin-bottom:10px;font-size:.9rem;}
 .new-biz-field select{padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font:inherit;background:#fff;}
+.dash-btn-danger{background:#b91c1c;color:#fff;border:0;border-radius:8px;padding:10px 16px;font:inherit;cursor:pointer;}
+.dash-btn-danger:disabled{opacity:.6;cursor:default;}

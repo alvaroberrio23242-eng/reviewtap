@@ -52,6 +52,8 @@
         </div>
       </div>
 
+      <div style="margin-bottom:16px"><button type="button" class="dash-btn-ghost" data-open-del-biz>Eliminar negocio</button></div>
+
       <!-- Metrics -->
       <div class="metrics-grid">
         <div class="metric-card">
@@ -112,6 +114,7 @@
                 <td>
                   <a href="/business/{{ business.id }}/devices/{{ device.id }}/qr/download" target="_blank" rel="noopener">Descargar QR</a>
                   <button type="button" class="dash-btn-ghost" data-toggle-dev="{{ device.id }}" data-status="{{ device.status }}">{% if device.status == 'active' %}Desactivar{% else %}Activar{% endif %}</button>
+                  <button type="button" class="dash-btn-ghost" data-delete-dev="{{ device.id }}" data-name="{{ device.name }}">Eliminar</button>
                 </td>
               </tr>
               {% endfor %}
@@ -139,6 +142,7 @@
               <tr>
                 <th>Nombre</th>
                 <th>Ciudad</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -146,6 +150,7 @@
               <tr>
                 <td>{{ loc.name }}</td>
                 <td>{{ loc.city or '—' }}</td>
+                <td><button type="button" class="dash-btn-ghost" data-delete-loc="{{ loc.id }}" data-name="{{ loc.name }}" data-devices="{{ devices | selectattr('location_id', 'equalto', loc.id) | list | length }}">Eliminar</button></td>
               </tr>
               {% endfor %}
             </tbody>
@@ -408,6 +413,82 @@
         if (res.ok) { window.location.reload(); }
         else { btn.disabled = false; alert(res.data.error || "No se pudo cambiar el estado"); }
       } catch (x) { btn.disabled = false; alert("Error de conexi\u00f3n"); }
+    });
+  });
+})();
+</script>
+
+<dialog id="del-dialog" class="new-biz-dialog">
+  <h2 id="del-title" style="margin:0 0 12px">Confirmar</h2>
+  <p id="del-text" style="margin:0 0 16px"></p>
+  <div id="del-error" class="new-biz-error" role="alert"></div>
+  <div class="new-biz-actions">
+    <button type="button" id="del-cancel" class="dash-btn-ghost">Cancelar</button>
+    <button type="button" id="del-confirm" class="dash-btn-danger">Eliminar</button>
+  </div>
+</dialog>
+<script>
+(function () {
+  var BIZ = {{ business.id }};
+  var BNAME = {{ business.name|tojson }};
+  var dlg = document.getElementById("del-dialog");
+  if (!dlg) return;
+  var title = document.getElementById("del-title");
+  var text = document.getElementById("del-text");
+  var err = document.getElementById("del-error");
+  var confirmBtn = document.getElementById("del-confirm");
+  var pending = null;
+  function token() {
+    var meta = document.querySelector("meta[name=csrf-token]");
+    var inp = document.querySelector("input[name=csrf_token]");
+    return meta ? meta.content : (inp ? inp.value : "");
+  }
+  function showErr(msg) { err.textContent = msg; err.style.display = "block"; }
+  function ask(t, msg, url, after) {
+    title.textContent = t;
+    text.textContent = msg;
+    err.style.display = "none";
+    confirmBtn.disabled = false;
+    pending = { url: url, after: after };
+    dlg.showModal();
+  }
+  document.getElementById("del-cancel").addEventListener("click", function () { dlg.close(); });
+  confirmBtn.addEventListener("click", async function () {
+    if (!pending) return;
+    confirmBtn.disabled = true;
+    try {
+      var r = await fetch(pending.url, { method: "DELETE", headers: { "X-CSRFToken": token() } });
+      var d = {};
+      try { d = await r.json(); } catch (x) {}
+      if (r.ok) { pending.after(); }
+      else { showErr(d.error || "No se pudo eliminar"); confirmBtn.disabled = false; }
+    } catch (x) { showErr("Error de conexi\u00f3n"); confirmBtn.disabled = false; }
+  });
+  function reload() { window.location.reload(); }
+  var END = " Esta acci\u00f3n no se puede deshacer.";
+  document.querySelectorAll("[data-delete-dev]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var name = btn.getAttribute("data-name") || "este dispositivo";
+      ask("Eliminar dispositivo",
+        "Se eliminar\u00e1 \"" + name + "\" y su c\u00f3digo QR. Si el QR ya est\u00e1 impreso, dejar\u00e1 de funcionar." + END,
+        "/business/" + BIZ + "/devices/" + btn.getAttribute("data-delete-dev"), reload);
+    });
+  });
+  document.querySelectorAll("[data-delete-loc]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var name = btn.getAttribute("data-name") || "esta ubicaci\u00f3n";
+      var n = parseInt(btn.getAttribute("data-devices"), 10) || 0;
+      var extra = n > 0 ? " Tambi\u00e9n se eliminar\u00e1n sus " + n + " dispositivo(s) y sus c\u00f3digos QR; los QR ya impresos dejar\u00e1n de funcionar." : "";
+      ask("Eliminar ubicaci\u00f3n",
+        "Se eliminar\u00e1 la ubicaci\u00f3n \"" + name + "\"." + extra + END,
+        "/business/" + BIZ + "/locations/" + btn.getAttribute("data-delete-loc"), reload);
+    });
+  });
+  document.querySelectorAll("[data-open-del-biz]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      ask("Eliminar negocio",
+        "Se eliminar\u00e1 \"" + BNAME + "\" y dejar\u00e1 de aparecer en tu panel.",
+        "/business/" + BIZ, function () { window.location.href = "/dashboard"; });
     });
   });
 })();
