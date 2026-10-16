@@ -164,6 +164,48 @@
         </div>
       </div>
 
+      <!-- Channels -->
+      <div class="dash-section">
+        {% set CHAN = {'google': 'Google', 'tripadvisor': 'TripAdvisor', 'whatsapp': 'WhatsApp', 'instagram': 'Instagram', 'facebook': 'Facebook', 'website': 'Sitio web'} %}
+        {% set chans = business.integrations | list | sort(attribute='sort_order') %}
+        <div class="dash-section-header">
+          <div><h2 class="dash-section-title">Canales</h2><p class="dash-section-hint">Los canales son los botones que ve tu cliente al escanear: tu perfil de Google, TripAdvisor, WhatsApp, Instagram, Facebook o tu sitio web. Agrega el enlace de cada uno. Todos se muestran con el mismo peso a todos tus clientes.</p></div>
+          <button type="button" class="dash-btn-primary" data-open-new-chan>+ Nuevo canal</button>
+        </div>
+        <div class="dash-section-body">
+          {% if chans %}
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Canal</th>
+                <th>Enlace</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ch in chans %}
+              <tr>
+                <td>{{ CHAN.get(ch.channel, ch.channel) }}</td>
+                <td><a href="{{ ch.url }}" target="_blank" rel="noopener noreferrer">{{ ch.url|truncate(40) }}</a></td>
+                <td><span class="badge {{ 'active' if ch.is_active else 'inactive' }}">{{ 'Activo' if ch.is_active else 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="dash-btn-ghost" data-toggle-chan="{{ ch.id }}" data-active="{{ 1 if ch.is_active else 0 }}">{{ 'Desactivar' if ch.is_active else 'Activar' }}</button>
+                  <button type="button" class="dash-btn-ghost" data-delete-chan="{{ ch.id }}" data-name="{{ CHAN.get(ch.channel, ch.channel) }}">Eliminar</button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="empty-state">
+            <h3>Sin canales</h3>
+            <p>Agrega al menos un canal para que tus clientes tengan a d&oacute;nde ir al escanear</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
       <!-- Event Breakdown -->
       {% if event_breakdown %}
       <div class="dash-section">
@@ -418,6 +460,75 @@
 })();
 </script>
 
+<dialog id="new-chan-dialog" class="new-biz-dialog">
+  <form id="new-chan-form" method="dialog">
+    <h2 style="margin:0 0 16px">Nuevo canal</h2>
+    <div id="new-chan-error" class="new-biz-error" role="alert"></div>
+    {% set used = chans | map(attribute='channel') | list %}
+    <label class="new-biz-field">Canal *
+      <select id="nc-channel" required>
+        {% for key in ['google', 'tripadvisor', 'whatsapp', 'instagram', 'facebook', 'website'] %}{% if key not in used %}<option value="{{ key }}">{{ CHAN[key] }}</option>{% endif %}{% endfor %}
+      </select>
+    </label>
+    <label class="new-biz-field">Enlace (https) *<input id="nc-url" type="url" maxlength="500" placeholder="https://..." required></label>
+    <div class="new-biz-actions">
+      <button type="button" id="new-chan-cancel" class="dash-btn-ghost">Cancelar</button>
+      <button type="submit" class="dash-btn-primary">Agregar canal</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  var BIZ = {{ business.id }};
+  function token() {
+    var meta = document.querySelector("meta[name=csrf-token]");
+    var inp = document.querySelector("input[name=csrf_token]");
+    return meta ? meta.content : (inp ? inp.value : "");
+  }
+  async function call(method, path, body) {
+    var opts = { method: method, headers: { "X-CSRFToken": token() } };
+    if (body) { opts.headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(body); }
+    var r = await fetch(path, opts);
+    var d = {};
+    try { d = await r.json(); } catch (x) {}
+    return { ok: r.ok, data: d };
+  }
+  var dlg = document.getElementById("new-chan-dialog");
+  if (dlg) {
+    var form = document.getElementById("new-chan-form");
+    var err = document.getElementById("new-chan-error");
+    function show(msg) { err.textContent = msg; err.style.display = "block"; }
+    document.querySelectorAll("[data-open-new-chan]").forEach(function (b) {
+      b.addEventListener("click", function () { err.style.display = "none"; form.reset(); dlg.showModal(); });
+    });
+    document.getElementById("new-chan-cancel").addEventListener("click", function () { dlg.close(); });
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      try {
+        var res = await call("POST", "/business/" + BIZ + "/integrations", {
+          channel: document.getElementById("nc-channel").value,
+          url: document.getElementById("nc-url").value.trim()
+        });
+        if (res.ok) { window.location.reload(); }
+        else { show(res.data.error || "No se pudo agregar el canal"); }
+      } catch (x) { show("Error de conexi\u00f3n"); }
+    });
+  }
+  document.querySelectorAll("[data-toggle-chan]").forEach(function (btn) {
+    btn.addEventListener("click", async function () {
+      var makeActive = btn.getAttribute("data-active") !== "1";
+      btn.disabled = true;
+      try {
+        var res = await call("PATCH", "/business/" + BIZ + "/integrations/" + btn.getAttribute("data-toggle-chan"), { is_active: makeActive });
+        if (res.ok) { window.location.reload(); }
+        else { btn.disabled = false; alert(res.data.error || "No se pudo cambiar el estado"); }
+      } catch (x) { btn.disabled = false; alert("Error de conexi\u00f3n"); }
+    });
+  });
+})();
+</script>
+
 <dialog id="del-dialog" class="new-biz-dialog">
   <h2 id="del-title" style="margin:0 0 12px">Confirmar</h2>
   <p id="del-text" style="margin:0 0 16px"></p>
@@ -482,6 +593,14 @@
       ask("Eliminar ubicaci\u00f3n",
         "Se eliminar\u00e1 la ubicaci\u00f3n \"" + name + "\"." + extra + END,
         "/business/" + BIZ + "/locations/" + btn.getAttribute("data-delete-loc"), reload);
+    });
+  });
+  document.querySelectorAll("[data-delete-chan]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var name = btn.getAttribute("data-name") || "este canal";
+      ask("Eliminar canal",
+        "Se eliminar\u00e1 el canal \"" + name + "\" y su bot\u00f3n dejar\u00e1 de aparecer cuando tus clientes escaneen." + END,
+        "/business/" + BIZ + "/integrations/" + btn.getAttribute("data-delete-chan"), reload);
     });
   });
   document.querySelectorAll("[data-open-del-biz]").forEach(function (btn) {

@@ -51,6 +51,7 @@ def _register_blueprints(app):
     from app.routes.api import api_bp
     from app.routes.errors import errors_bp
     from app.routes.landing import landing_bp
+    from app.routes.integration import integration_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -62,3 +63,4 @@ def _register_blueprints(app):
     app.register_blueprint(api_bp)
     app.register_blueprint(errors_bp)
     app.register_blueprint(landing_bp)
+    app.register_blueprint(integration_bp)
