@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, render_template, request, url_for
 
 from app.extensions import db, limiter
 from app.models.analytics import AnalyticsEvent
+from app.models.device import NFCDevice
 from app.services.device_service import record_public_interaction
 
 public_bp = Blueprint("public", __name__, static_folder="../static", static_url_path="/public-static")
@@ -57,25 +58,37 @@ def _build_channels(business):
     return channels
 
 
+def _wants_html():
+    return request.accept_mimetypes.best_match(["application/json", "text/html"]) == "text/html"
+
+
+def _unavailable(error):
+    if _wants_html():
+        return render_template("public/unavailable.html"), 404
+    return jsonify({"error": error}), 404
+
+
 @public_bp.route("/r/<device_code>")
 @limiter.limit("60/minute")
 def public_profile(device_code):
-    device = record_public_interaction(
+    device = NFCDevice.query.filter_by(device_code=device_code).first()
+
+    if device is None:
+        return _unavailable("Device not found")
+
+    if device.status != "active":
+        return _unavailable("Device is inactive")
+
+    business = device.business
+
+    if business is None or business.is_deleted or not business.is_active:
+        return _unavailable("Business not available")
+
+    record_public_interaction(
         device_code=device_code,
         ip_address=request.remote_addr,
         user_agent=str(request.user_agent),
     )
-
-    if device is None:
-        return jsonify({"error": "Device not found"}), 404
-
-    if device.status != "active":
-        return jsonify({"error": "Device is inactive"}), 404
-
-    business = device.business
-
-    if business.is_deleted or not business.is_active:
-        return jsonify({"error": "Business not available"}), 404
 
     location = device.location if device.location_id else None
     channels = _build_channels(business)

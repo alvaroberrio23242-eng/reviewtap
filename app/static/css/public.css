@@ -378,3 +378,5 @@ body {
     transform: none;
   }
 }
+
+.channels-empty { margin: 0 0 12px; text-align: center; color: var(--text-secondary); font-size: 0.95rem; }

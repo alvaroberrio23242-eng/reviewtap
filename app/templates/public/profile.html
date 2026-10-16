@@ -69,6 +69,7 @@
         </div>
 
         <!-- Channels -->
+        {% if not channels %}<p class="channels-empty">Este negocio a&uacute;n no configur&oacute; sus canales.</p>{% endif %}
         <div class="channels" role="list" aria-label="Canales para compartir tu experiencia">
           {% for ch in channels %}
           <a href="{{ ch.url }}"
